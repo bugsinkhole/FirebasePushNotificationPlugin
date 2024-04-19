@@ -15,8 +15,8 @@ namespace Plugin.FirebasePushNotification
             {
                 foreach (var key in extras.KeySet())
                 {
-                    parameters.Add(key, $"{extras.Get(key)}");
-                    System.Diagnostics.Debug.WriteLine(key, $"{extras.Get(key)}");
+                    parameters.Add(key, extras.GetString(key));
+                    System.Diagnostics.Debug.WriteLine(key, extras.GetString(key));
                 }
             }
 
