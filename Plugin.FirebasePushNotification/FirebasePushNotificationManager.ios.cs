@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Firebase.CloudMessaging;
 using Firebase.Core;
-using Firebase.InstanceID;
+//using Firebase.InstanceID; //Old
 using Foundation;
 using UIKit;
 using UserNotifications;
@@ -302,7 +302,8 @@ namespace Plugin.FirebasePushNotification
             Messaging.SharedInstance.AutoInitEnabled = false;
             UIApplication.SharedApplication.UnregisterForRemoteNotifications();
             NSUserDefaults.StandardUserDefaults.SetString(string.Empty, FirebaseTokenKey);
-            InstanceId.SharedInstance.DeleteId((h) => { });
+            Messaging.SharedInstance.DeleteToken((h) => { });
+            //InstanceId.SharedInstance.DeleteId((h) => { }); Old
         }
         // To receive notifications in foreground on iOS 10 devices.
         [Export("userNotificationCenter:willPresentNotification:withCompletionHandler:")]
@@ -315,7 +316,7 @@ namespace Plugin.FirebasePushNotification
             _onNotificationReceived?.Invoke(CrossFirebasePushNotification.Current, new FirebasePushNotificationDataEventArgs(parameters));
             CrossFirebasePushNotification.Current.NotificationHandler?.OnReceived(parameters);
 
-            if ((parameters.TryGetValue("priority", out var priority) && ($"{priority}".ToLower() == "high" || $"{priority}".ToLower() == "max")))
+            if ((parameters.TryGetValue("priority", out var priority) && ($"{priority}".Equals("high", StringComparison.CurrentCultureIgnoreCase) || $"{priority}".Equals("max", StringComparison.CurrentCultureIgnoreCase))))
             {
                 if (!CurrentNotificationPresentationOption.HasFlag(UNNotificationPresentationOptions.Alert))
                 {
@@ -323,7 +324,7 @@ namespace Plugin.FirebasePushNotification
 
                 }
             }
-            else if ($"{priority}".ToLower() == "default" || $"{priority}".ToLower() == "low" || $"{priority}".ToLower() == "min")
+            else if ($"{priority}".Equals("default", StringComparison.CurrentCultureIgnoreCase) || $"{priority}".Equals("low", StringComparison.CurrentCultureIgnoreCase) || $"{priority}".Equals("min", StringComparison.CurrentCultureIgnoreCase))
             {
                 if (CurrentNotificationPresentationOption.HasFlag(UNNotificationPresentationOptions.Alert))
                 {
@@ -361,14 +362,15 @@ namespace Plugin.FirebasePushNotification
             _onNotificationError?.Invoke(CrossFirebasePushNotification.Current, new FirebasePushNotificationErrorEventArgs(FirebasePushNotificationErrorType.RegistrationFailed, error.Description));
         }
 
-        public void ApplicationReceivedRemoteMessage(RemoteMessage remoteMessage)
-        {
-            System.Console.WriteLine(remoteMessage.AppData);
-            System.Diagnostics.Debug.WriteLine("ApplicationReceivedRemoteMessage");
-            var parameters = GetParameters(remoteMessage.AppData);
-            _onNotificationReceived?.Invoke(CrossFirebasePushNotification.Current, new FirebasePushNotificationDataEventArgs(parameters));
-            CrossFirebasePushNotification.Current.NotificationHandler?.OnReceived(parameters);
-        }
+        //public void ApplicationReceivedRemoteMessage(RemoteMessage remoteMessage)
+        //{
+        //    Firebase.CloudMessaging.MessageStatus.
+        //    System.Console.WriteLine(remoteMessage.AppData);
+        //    System.Diagnostics.Debug.WriteLine("ApplicationReceivedRemoteMessage");
+        //    var parameters = GetParameters(remoteMessage.AppData);
+        //    _onNotificationReceived?.Invoke(CrossFirebasePushNotification.Current, new FirebasePushNotificationDataEventArgs(parameters));
+        //    CrossFirebasePushNotification.Current.NotificationHandler?.OnReceived(parameters);
+        //}
 
         private static IDictionary<string, object> GetParameters(NSDictionary data)
         {
@@ -480,6 +482,7 @@ namespace Plugin.FirebasePushNotification
 
         }
 
+        [Obsolete("Upstream messaging through direct channel is deprecated. Not working anymore.", true)]
         public void SendDeviceGroupMessage(IDictionary<string, string> parameters, string groupKey, string messageId, int timeOfLive)
         {
             if (hasToken)
@@ -491,9 +494,9 @@ namespace Plugin.FirebasePushNotification
                         message.Add(new NSString(p.Key), new NSString(p.Value));
                     }
 
-                    Messaging.SharedInstance.SendMessage(message, groupKey, messageId, timeOfLive);
+                    // Messaging.SharedInstance.SendMessage(message, groupKey, messageId, timeOfLive); //Old
                 }
-                  
+
             }
         }
 
@@ -609,8 +612,8 @@ namespace Plugin.FirebasePushNotification
 
         public async Task<string> GetTokenAsync()
         {
-            var result = await InstanceId.SharedInstance.GetInstanceIdAsync();
-            return result?.Token;
+            var result = await Messaging.SharedInstance.FetchTokenAsync();//InstanceId.SharedInstance.GetInstanceIdAsync(); Old
+            return result;
         }
     }
 
