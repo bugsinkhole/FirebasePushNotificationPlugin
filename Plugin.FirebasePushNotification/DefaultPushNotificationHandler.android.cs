@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -228,12 +228,12 @@ namespace Plugin.FirebasePushNotification
 
             if (parameters.TryGetValue(ShowWhenKey, out var shouldShowWhen))
             {
-                showWhenVisible = $"{shouldShowWhen}".ToLower() == "true";
+                showWhenVisible = $"{shouldShowWhen}".Equals("true", StringComparison.CurrentCultureIgnoreCase);
             }
 
             if (parameters.TryGetValue(BigTextStyleKey, out var shouldUseBigTextStyle) && shouldUseBigTextStyle != null)
             {
-                useBigTextStyle = $"{shouldUseBigTextStyle}".ToLower() == "true";
+                useBigTextStyle = $"{shouldUseBigTextStyle}".Equals("true", StringComparison.CurrentCultureIgnoreCase);
             }
 
             if (parameters.TryGetValue(TagKey, out var tagContent))
