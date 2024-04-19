@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Firebase.Messaging;
 using System.Collections.Generic;
 using Android.Content;
@@ -61,9 +61,9 @@ namespace Plugin.FirebasePushNotification
                 var parameters = new Dictionary<string, object>();
                 foreach (var key in extras.KeySet())
                 {
-                    if (!parameters.ContainsKey(key) && extras.Get(key) != null)
+                    if (!parameters.ContainsKey(key) && !string.IsNullOrWhiteSpace(extras.GetString(key)))
                     {
-                        parameters.Add(key, $"{extras.Get(key)}");
+                        parameters.Add(key, extras.GetString(key));
                     }
                 }
 
@@ -197,7 +197,7 @@ namespace Plugin.FirebasePushNotification
             RegisterUserNotificationCategories(notificationCategories);
 
         }
-    
+
         public static void Reset()
         {
             ThreadPool.QueueUserWorkItem(state =>
